@@ -25,6 +25,7 @@ Parameters:
   CodeStarConnectionArn:
     Type: String
     Description: ARN of the CodeStar Connection to GitHub
+    Default: arn:aws:codeconnections:us-east-1:863518433401:connection/93db5c80-9c28-4186-a66f-bcf37e9532af
 
 Resources:
   # VPC Setup
