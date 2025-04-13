@@ -20,15 +20,15 @@ phases:
       - docker build -t khurana-flask-image .
       - echo "Scanning the Docker image for vulnerabilities..."
       - trivy image --exit-code 1 --severity CRITICAL khurana-flask-image || echo "No critical vulnerabilities found."
-      - docker tag khurana-flask-image:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:$IMAGE_TAG
+      - docker tag khurana-flask-image:latest 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest
 
   post_build:
     commands:
       - echo "Build completed on `date`"
       - echo Pushing the Docker image to ECR...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:$IMAGE_TAG
+      - docker push 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest
       - echo Writing image definitions file...
-      - printf '[{"name":"khurana-flask-app","imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"khurana-flask-app","imageUri":"%s"}]' 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest > imagedefinitions.json
 
 artifacts:
   files:
