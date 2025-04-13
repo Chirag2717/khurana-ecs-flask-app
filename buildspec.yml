@@ -5,31 +5,28 @@ phases:
     commands:
       - echo "Installing security scanning tools..."
       - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin v0.61.0
-
+  
   pre_build:
     commands:
       - echo "Getting commit hash..."
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:-latest}
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 863518433401.dkr.ecr.us-east-1.amazonaws.com
-
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t khurana-flask-image .
+      - docker build -t $ECR_REPO:$IMAGE_TAG .
       - echo "Scanning the Docker image for vulnerabilities..."
-      - trivy image --exit-code 1 --severity CRITICAL khurana-flask-image || echo "No critical vulnerabilities found."
-      - docker tag khurana-flask-image:latest 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest
-
+      - trivy image --exit-code 1 --severity CRITICAL $IMAGE_REPO_NAME:$IMAGE_TAG || echo "No critical vulnerabilities found."
+      - docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
   post_build:
     commands:
       - echo "Build completed on `date`"
       - echo Pushing the Docker image to ECR...
-      - docker push 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"khurana-flask-app","imageUri":"%s"}]' 863518433401.dkr.ecr.$AWS_REGION.amazonaws.com/khurana-ecr-flask:latest > imagedefinitions.json
-
+      - printf '[{"name":"khurana-flask-app","imageUri":"%s"}]' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG > imagedefinitions.json
 artifacts:
   files:
     - imagedefinitions.json
