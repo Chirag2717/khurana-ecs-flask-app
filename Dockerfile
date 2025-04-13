@@ -1,11 +1,6 @@
-FROM python:3.9-slim
-
+FROM public.ecr.aws/docker/library/python:3.9-slim
 WORKDIR /app
-
+RUN pip install --no-cache-dir flask
 COPY app.py .
-
-RUN pip install flask
-
-EXPOSE 5000
-
+EXPOSE 80
 CMD ["python", "app.py"]
